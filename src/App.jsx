@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import Auth from "./Auth.jsx";
+import Bank from "./Bank.jsx";
 
 const BG = "#f5f1ea";
 const STORAGE_KEY = "budget-buddy-data"; // fallback local key, unused once signed in
@@ -503,45 +504,6 @@ function Dreams({ dreams, addDream, addFunds, deleteDream }) {
   );
 }
 
-function Bank() {
-  return (
-    <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h1 className="text-4xl font-serif text-stone-800 mb-2">Connected Banks</h1>
-          <p className="text-stone-500">Automatically sync your household expenses.</p>
-        </div>
-        <button className="flex items-center gap-2 bg-[#c9603f] text-white px-4 py-2.5 rounded-full font-medium hover:bg-[#b65334] transition-colors">
-          <Plus size={18} /> Add Bank Account
-        </button>
-      </div>
-
-      <div className="bg-[#fbeae3] rounded-2xl p-4 flex items-start gap-3 mb-5">
-        <ShieldCheck size={20} className="text-[#c9603f] mt-0.5" />
-        <div>
-          <div className="font-medium text-[#c9603f] text-sm">Bank-level security</div>
-          <div className="text-sm text-[#c98a5f]">
-            We use Plaid to connect to your bank. Your login credentials are never stored or seen by us.
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl p-16 flex flex-col items-center text-center">
-        <div className="w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center mb-4">
-          <Landmark size={22} className="text-[#5d7256]" />
-        </div>
-        <h3 className="font-serif text-xl text-stone-800 mb-2">No banks connected</h3>
-        <p className="text-stone-500 text-sm mb-5 max-w-sm">
-          Link your bank accounts to automatically track and categorize your household spending.
-        </p>
-        <button className="bg-stone-100 text-stone-700 px-5 py-2.5 rounded-xl font-medium hover:bg-stone-200 transition-colors">
-          Add your first bank
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking, null = signed out
   const [page, setPage] = useState("overview");
@@ -624,6 +586,24 @@ export default function App() {
   function deleteDream(id) {
     setDreams((prev) => prev.filter((d) => d.id !== id));
   }
+  function importPlaidTransactions(plaidTxns) {
+    setExpenses((prev) => {
+      const existingPlaidIds = new Set(prev.filter((e) => e.plaidId).map((e) => e.plaidId));
+      const newOnes = plaidTxns
+        .filter((t) => !existingPlaidIds.has(t.id))
+        .map((t) => ({
+          id: "plaid-" + t.id,
+          plaidId: t.id,
+          name: t.name,
+          category: t.category,
+          amount: t.amount,
+          date: t.date,
+          payer: t.institution,
+        }));
+      return [...prev, ...newOnes];
+    });
+    setPage("expenses");
+  }
 
   const navItems = [
     { key: "overview", label: "Overview", icon: <Home size={18} /> },
@@ -679,7 +659,7 @@ export default function App() {
           <Budgets budgets={budgets} expenses={expenses} addBudget={addBudget} updateBudget={updateBudget} deleteBudget={deleteBudget} />
         )}
         {page === "dreams" && <Dreams dreams={dreams} addDream={addDream} addFunds={addFunds} deleteDream={deleteDream} />}
-        {page === "bank" && <Bank />}
+        {page === "bank" && <Bank session={session} onImportTransactions={importPlaidTransactions} />}
       </div>
     </div>
   );
