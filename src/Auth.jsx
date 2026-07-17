@@ -38,7 +38,7 @@ export default function Auth() {
           <div className="w-9 h-9 rounded-full bg-[#fbe3da] flex items-center justify-center">
             <Heart size={18} className="text-[#c9603f]" fill="#c9603f" />
           </div>
-          <span className="font-serif text-xl text-stone-800">Budget Buddy</span>
+          <span className="font-serif text-xl text-stone-800">RitchFix</span>
         </div>
 
         <h1 className="text-center text-stone-700 mb-6">
