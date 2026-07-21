@@ -507,10 +507,10 @@ function Dreams({ dreams, addDream, addFunds, deleteDream }) {
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking, null = signed out
   const [page, setPage] = useState("overview");
-  const [appName] = useState("Budget Buddy");
-  const [expenses, setExpenses] = useState(DEFAULT_EXPENSES);
+  const [appName] = useState("RitchFix");
+  const [expenses, setExpenses] = useState([]);
   const [budgets, setBudgets] = useState(DEFAULT_BUDGETS);
-  const [dreams, setDreams] = useState(DEFAULT_DREAMS);
+  const [dreams, setDreams] = useState([]);
   const [payers] = useState(["Joint", "Husband", "Wife"]);
   const [loaded, setLoaded] = useState(false);
 
@@ -534,9 +534,11 @@ export default function App() {
         if (saved.budgets) setBudgets(saved.budgets);
         if (saved.dreams) setDreams(saved.dreams);
       } else {
-        setExpenses(DEFAULT_EXPENSES);
+        // Brand new account — start with real-world-empty data, not sample content.
+        // Category structure is kept so the expense form has something to select.
+        setExpenses([]);
         setBudgets(DEFAULT_BUDGETS);
-        setDreams(DEFAULT_DREAMS);
+        setDreams([]);
       }
       setLoaded(true);
     })();
